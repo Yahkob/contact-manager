@@ -1,59 +1,25 @@
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
-import {Link, withRouter} from 'react-router-dom';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import Link from 'react-router/Link';
 import Button from '../components/Button';
-import {contactDelete, contactFetch} from '../actions';
+import { contactDelete } from '../actions';
 
 class ContactList extends Component {
-  componentWillMount() {
-    this
-      .props
-      .onLoad();
-  }
-
   render() {
     return (
-      <div>
-        <Link to="/new" className="btn btn-primary">
-          Create Contact
-        </Link>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th colSpan={2}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {this
-              .props
-              .contactList
-              .map(({
-                id,
-                name,
-                phone,
-                email
-              }, index) => (
-                <tr key={index}>
-                  <td>{name}</td>
-                  <td>{phone}</td>
-                  <td>{email}</td>
-                  <td>
-                    <Link to={`/edit/${id}`} className="btn btn-primary">Edit</Link>
-                  </td>
-                  <td>
-                    <Button buttonType="btn-danger" onClick={() => this.props.onClickDelete(id)}>
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
+        <div>
+          <h1>Contacts</h1>
+          <Link to="/new">
+            Create new Contact
+          </Link>
+          <ul>
+            {
+              this.props.contactList.map(({ name, phone, email }, index) => (
+                  <li>{name} - {phone} - {email} - <Button buttonType="btn-danger" onClick={() => this.props.onClickDelete(index)}>Delete</Button></li>
               ))
-}
-          </tbody>
-        </table>
-      </div>
+            }
+          </ul>
+        </div>
     );
   }
 }
@@ -63,8 +29,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onClickDelete: id => dispatch(contactDelete(id)),
-  onLoad: () => dispatch(contactFetch())
+  onClickDelete: index => dispatch(contactDelete(index))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(ContactList));
+export default connect(mapStateToProps, mapDispatchToProps)(ContactList);

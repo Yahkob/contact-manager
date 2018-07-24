@@ -3,54 +3,20 @@ const initialState = {
   loading: false
 };
 
-const findContactIndex = (state, id) => state
-  .contactList
-  .findIndex(c => c.id === id);
-
 export const contactsReducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'CONTACT_ADD':
+    case 'contact_add':
       return {
-        ...state,
-        contactList: state
-          .contactList
-          .concat(action.contact)
+          ...state,
+        contactList: state.contactList.concat(action.contact)
       };
-    case 'CONTACT_DELETE':
-      {
-        let index = findContactIndex(state, action.id);
-        return {
-          ...state,
-          contactList: [
-            ...state
-              .contactList
-              .slice(0, index),
-            ...state
-              .contactList
-              .slice(index + 1)
-          ]
-        };
-      }
-    case 'CONTACT_EDIT':
-      {
-        let index = findContactIndex(state, action.contact.id);
-        return {
-          ...state,
-          contactList: [
-            ...state
-              .contactList
-              .slice(0, index),
-            action.contact,
-            ...state
-              .contactList
-              .slice(index + 1)
-          ]
-        };
-      }
-    case 'CONTACT_FETCH':
+    case 'contact_delete':
       return {
-        ...state,
-        contactList: action.contacts
+          ...state,
+          contactList: [
+              ...state.contactList.slice(0, action.index),
+              ...state.contactList.slice(action.index + 1)
+          ]
       };
     default:
       return state;

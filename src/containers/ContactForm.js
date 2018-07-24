@@ -1,86 +1,51 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import { reduxForm, Field } from 'redux-form';
-import TextInput from '../components/TextInput';
+import { connect } from 'react-redux';
+import Link from 'react-router/Link';
+import { contactFormUpdate, contactAdd } from '../actions';
 
 class ContactForm extends Component {
-  required(value) {
-    return value && value.length > 0 ? undefined : 'This field is required.';
+  handleChange(event, prop) {
+    const { value } = event.target;
+    this.props.onChange({ prop, value });
   }
 
-  maxLength(max) {
-    return value => value && value.length <= max ? undefined : `Must have ${max} characters or less.`;
-  }
+  handleSubmit() {
+    const { name, phone, email } = this.props;
 
-  phoneFormat(value) {
-    return value && /^\+1 \([0-9]{3}\) [0-9]{3}-[0-9]{4}$/.test(value) ? undefined : 'Must be in US format, e.g. +1 (111) 111-1111';
+    this.props.onSubmit({ name, phone, email });
   }
 
   render() {
-    const { handleSubmit, pristine, submitting, reset } = this.props;
+    console.log(this.props);
     return (
-      <form className="form-horizontal" onSubmit={handleSubmit}>
-        <Field name="id" type="hidden" component="input" />
-
-        <Field
-          name="name"
-          component={TextInput}
-          type="text"
-          label="Name"
-          placeholder="e.g. John Doe"
-          validate={[
-            this.required,
-            (() => this.maxLength(25))()
-          ]}
-        />
-
-        <Field
-          name="phone"
-          component={TextInput}
-          type="text"
-          label="Phone"
-          placeholder="(111) 111-1111"
-          validate={[
-            this.required,
-            this.phoneFormat
-          ]}
-        />
-
-        <Field
-          name="email"
-          component={TextInput}
-          type="email"
-          label="Email"
-          placeholder="john.doe@example.com"
-          validate={this.required}
-        />
-
-        <fieldset className="form-group">
-          <button type="submit" disabled={pristine || submitting} className="btn btn-primary">Submit</button>&nbsp;
-          <button type="button" disabled={pristine || submitting} className="btn btn-default" onClick={reset}>Reset</button>&nbsp;
-          <Link to="/"><i className="glyphicon glyphicon-chevron-left"></i> Back to Home Page</Link>
-        </fieldset>
-      </form>
-    )
+        <form className="form-horizontal">
+          <fieldset className="form-group">
+            <label htmlFor="name">Name</label>
+            <input type="text" id="name" className="form-control" value={this.props.name} onChange={event => this.handleChange(event, 'name')} placeholder="e.g. John Doe"  />
+          </fieldset>
+          <fieldset className="form-group">
+            <label htmlFor="phone">Phone</label>
+            <input type="text" id="phone" className="form-control" value={this.props.phone} onChange={event => this.handleChange(event, 'phone')} placeholder="(111) 111-111"  />
+          </fieldset>
+          <fieldset className="form-group">
+            <label htmlFor="email">E-mail</label>
+            <input type="email" id="email" className="form-control" value={this.props.email} onChange={event => this.handleChange(event, 'email')} placeholder="john.doe@example.com"  />
+          </fieldset>
+          <fieldset className="form-group">
+            <Link to="/" className="btn btn-primary" onClick={() => this.handleSubmit()}>Submit</Link>
+          </fieldset>
+        </form>
+    );
   }
 }
 
-const phoneUnique = values => {
-  const { phone, id } = values;
-  return fetch(`/contacts?phone=${btoa(phone)}&id=${id}`)
-    .then(response => response.json())
-    .then(json => {
-      if (json.length > 0) {
-        // eslint-disable-next-line
-        throw { phone: 'This phone number already exists.' };
-      }
-    });
-}
+const mapStateToProps = state => ({
+    ...state.contactForm
+});
 
-export default reduxForm({
-  form: 'contact', // This is the form's name and must be unique across the app
-  asyncValidate: phoneUnique,
-  asyncBlurFields: ['phone'],
-  enableReinitialize: true
-})(ContactForm);
+const mapDispatchToProps = dispatch => ({
+  onChange: values => dispatch(contactFormUpdate(values)),
+  onSubmit: contact => dispatch(contactAdd(contact))
+});
 
+export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);
